@@ -36,10 +36,13 @@ public class SysUserRoleController {
     /**
      * 保存用户角色
      */
-    @PutMapping
+    @PutMapping("/{userId}")
     @PreAuthorize("hasAuthority('system:user:role')")
     public Result<Void> saveRoles(
+            @PathVariable Long userId,
             @Valid @RequestBody UserRoleDTO dto) {
+
+        dto.setUserId(userId);
 
         sysUserRoleService.saveRoles(dto);
 

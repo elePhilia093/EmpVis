@@ -11,6 +11,8 @@ import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/sys/role")
 public class SysRoleController {
@@ -28,6 +30,14 @@ public class SysRoleController {
 
         return Result.success(
                 sysRoleService.page(queryDTO)
+        );
+    }
+
+    @GetMapping("/all")
+    @PreAuthorize("hasAuthority('system:user:role')")
+    public Result<List<RoleVO>> listAll() {
+        return Result.success(
+                sysRoleService.listAll()
         );
     }
 

@@ -34,6 +34,21 @@ public class SysRoleServiceImpl implements SysRoleService {
     }
 
     @Override
+    public List<RoleVO> listAll() {
+
+        LambdaQueryWrapper<SysRole> wrapper =
+                new LambdaQueryWrapper<>();
+
+        wrapper.eq(SysRole::getStatus, 1)
+                .orderByAsc(SysRole::getId);
+
+        return sysRoleMapper.selectList(wrapper)
+                .stream()
+                .map(this::toVO)
+                .toList();
+    }
+
+    @Override
     public PageResult<RoleVO> page(RoleQueryDTO queryDTO) {
 
         Page<SysRole> page = new Page<>(

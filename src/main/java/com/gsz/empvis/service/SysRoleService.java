@@ -6,6 +6,8 @@ import com.gsz.empvis.dto.role.RoleQueryDTO;
 import com.gsz.empvis.dto.role.RoleUpdateDTO;
 import com.gsz.empvis.vo.role.RoleVO;
 
+import java.util.List;
+
 public interface SysRoleService {
 
     PageResult<RoleVO> page(RoleQueryDTO queryDTO);
@@ -15,4 +17,6 @@ public interface SysRoleService {
     void update(RoleUpdateDTO updateDTO);
 
     void delete(Long id);
+
+    List<RoleVO> listAll();
 }

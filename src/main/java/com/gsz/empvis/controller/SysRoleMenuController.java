@@ -37,7 +37,7 @@ public class SysRoleMenuController {
     /**
      * 保存角色菜单权限
      */
-    @PutMapping
+    @PutMapping("/save")
     @PreAuthorize("hasAuthority('system:role:menu')")
     public Result<Void> saveMenus(
             @Valid @RequestBody RoleMenuDTO dto) {
