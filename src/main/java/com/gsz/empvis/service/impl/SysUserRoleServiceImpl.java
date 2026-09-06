@@ -5,6 +5,7 @@ import com.gsz.empvis.dto.user.UserRoleDTO;
 import com.gsz.empvis.entity.SysRole;
 import com.gsz.empvis.entity.SysUser;
 import com.gsz.empvis.entity.SysUserRole;
+import com.gsz.empvis.exception.BusinessException;
 import com.gsz.empvis.mapper.SysRoleMapper;
 import com.gsz.empvis.mapper.SysUserMapper;
 import com.gsz.empvis.mapper.SysUserRoleMapper;
@@ -55,7 +56,7 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
                 sysUserMapper.selectById(dto.getUserId());
 
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
 
         // 先删除原有角色
@@ -87,7 +88,7 @@ public class SysUserRoleServiceImpl implements SysUserRoleService {
                     sysRoleMapper.selectById(roleId);
 
             if (role == null) {
-                throw new RuntimeException(
+                throw new BusinessException(
                         "角色不存在：" + roleId
                 );
             }

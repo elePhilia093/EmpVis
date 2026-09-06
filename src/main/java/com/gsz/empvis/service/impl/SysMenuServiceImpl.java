@@ -6,6 +6,7 @@ import com.gsz.empvis.dto.menu.MenuQueryDTO;
 import com.gsz.empvis.dto.menu.MenuUpdateDTO;
 import com.gsz.empvis.entity.SysMenu;
 import com.gsz.empvis.entity.SysRoleMenu;
+import com.gsz.empvis.exception.BusinessException;
 import com.gsz.empvis.mapper.SysMenuMapper;
 import com.gsz.empvis.mapper.SysRoleMenuMapper;
 import com.gsz.empvis.service.SysMenuService;
@@ -55,9 +56,7 @@ public class SysMenuServiceImpl implements SysMenuService {
                 queryDTO.getMenuType()
         );
 
-        wrapper.orderByAsc(
-                SysMenu::getSortOrder
-        );
+        wrapper.orderByAsc(SysMenu::getSortOrder);
 
         List<SysMenu> menus =
                 sysMenuMapper.selectList(wrapper);
@@ -66,6 +65,14 @@ public class SysMenuServiceImpl implements SysMenuService {
                 .map(this::toVO)
                 .toList();
 
+        // 有查询条件：直接平铺返回
+        if (StringUtils.hasText(queryDTO.getMenuName())
+                || queryDTO.getMenuType() != null) {
+
+            return voList;
+        }
+
+        // 无查询条件：构建树
         Map<Long, MenuVO> menuMap = voList.stream()
                 .collect(Collectors.toMap(
                         MenuVO::getId,
@@ -108,7 +115,7 @@ public class SysMenuServiceImpl implements SysMenuService {
                     );
 
             if (parent == null) {
-                throw new RuntimeException("父级菜单不存在");
+                throw new BusinessException("父级菜单不存在");
             }
         }
 
@@ -141,14 +148,14 @@ public class SysMenuServiceImpl implements SysMenuService {
                 sysMenuMapper.selectById(updateDTO.getId());
 
         if (menu == null) {
-            throw new RuntimeException("菜单不存在");
+            throw new BusinessException("菜单不存在");
         }
 
         // 不能把自己设置为自己的父级
         if (updateDTO.getId()
                 .equals(updateDTO.getParentId())) {
 
-            throw new RuntimeException(
+            throw new BusinessException(
                     "父级菜单不能设置为当前菜单"
             );
         }
@@ -161,7 +168,7 @@ public class SysMenuServiceImpl implements SysMenuService {
                     );
 
             if (parent == null) {
-                throw new RuntimeException("父级菜单不存在");
+                throw new BusinessException("父级菜单不存在");
             }
         }
 
@@ -192,7 +199,7 @@ public class SysMenuServiceImpl implements SysMenuService {
                 sysMenuMapper.selectById(id);
 
         if (menu == null) {
-            throw new RuntimeException("菜单不存在");
+            throw new BusinessException("菜单不存在");
         }
 
         // 判断是否存在子菜单
@@ -208,7 +215,7 @@ public class SysMenuServiceImpl implements SysMenuService {
                 sysMenuMapper.selectCount(childWrapper);
 
         if (childCount > 0) {
-            throw new RuntimeException(
+            throw new BusinessException(
                     "该菜单存在子菜单，不能直接删除"
             );
         }
@@ -228,7 +235,7 @@ public class SysMenuServiceImpl implements SysMenuService {
                 );
 
         if (roleMenuCount > 0) {
-            throw new RuntimeException(
+            throw new BusinessException(
                     "该菜单已分配给角色，不能直接删除"
             );
         }

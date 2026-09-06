@@ -38,7 +38,7 @@ public class SysMenuController {
     /**
      * 新增菜单
      */
-    @PostMapping
+    @PostMapping("/add")
     @PreAuthorize("hasAuthority('system:menu:add')")
     public Result<Void> add(
             @Valid @RequestBody MenuAddDTO addDTO) {
@@ -51,7 +51,7 @@ public class SysMenuController {
     /**
      * 修改菜单
      */
-    @PutMapping
+    @PutMapping("/update")
     @PreAuthorize("hasAuthority('system:menu:update')")
     public Result<Void> update(
             @Valid @RequestBody MenuUpdateDTO updateDTO) {
@@ -64,7 +64,7 @@ public class SysMenuController {
     /**
      * 删除菜单
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAuthority('system:menu:delete')")
     public Result<Void> delete(
             @PathVariable Long id) {

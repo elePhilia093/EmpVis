@@ -11,6 +11,7 @@ import com.gsz.empvis.entity.SysRole;
 import com.gsz.empvis.entity.SysRoleMenu;
 import com.gsz.empvis.entity.SysUser;
 import com.gsz.empvis.entity.SysUserRole;
+import com.gsz.empvis.exception.BusinessException;
 import com.gsz.empvis.mapper.SysMenuMapper;
 import com.gsz.empvis.mapper.SysRoleMapper;
 import com.gsz.empvis.mapper.SysRoleMenuMapper;
@@ -72,7 +73,7 @@ public class SysUserServiceImpl implements SysUserService {
         SysUser user = sysUserMapper.selectById(userId);
 
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
 
         return new UserInfoVO(
@@ -98,18 +99,18 @@ public class SysUserServiceImpl implements SysUserService {
         SysUser user = getByUsername(username);
 
         if (user == null) {
-            throw new RuntimeException("用户名或密码错误");
+            throw new BusinessException("用户名或密码错误");
         }
 
         if (user.getStatus() == null || user.getStatus() != 1) {
-            throw new RuntimeException("账号已停用");
+            throw new BusinessException("账号已停用");
         }
 
         if (!passwordEncoder.matches(
                 password,
                 user.getPassword())) {
 
-            throw new RuntimeException("用户名或密码错误");
+            throw new BusinessException("用户名或密码错误");
         }
 
         String token = jwtUtil.generateToken(
@@ -265,7 +266,7 @@ public class SysUserServiceImpl implements SysUserService {
                 getByUsername(addDTO.getUsername());
 
         if (exist != null) {
-            throw new RuntimeException("登录账号已存在");
+            throw new BusinessException("登录账号已存在");
         }
 
         if (addDTO.getEmployeeId() != null) {
@@ -282,7 +283,7 @@ public class SysUserServiceImpl implements SysUserService {
                     sysUserMapper.selectCount(wrapper);
 
             if (count > 0) {
-                throw new RuntimeException("该员工已经绑定用户账号");
+                throw new BusinessException("该员工已经绑定用户账号");
             }
         }
 
@@ -317,7 +318,7 @@ public class SysUserServiceImpl implements SysUserService {
                 sysUserMapper.selectById(updateDTO.getId());
 
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
 
         if (StringUtils.hasText(updateDTO.getUsername())) {
@@ -339,7 +340,7 @@ public class SysUserServiceImpl implements SysUserService {
                     sysUserMapper.selectCount(wrapper);
 
             if (count > 0) {
-                throw new RuntimeException("登录账号已存在");
+                throw new BusinessException("登录账号已存在");
             }
 
             user.setUsername(updateDTO.getUsername());
@@ -366,7 +367,7 @@ public class SysUserServiceImpl implements SysUserService {
                     sysUserMapper.selectCount(wrapper);
 
             if (count > 0) {
-                throw new RuntimeException("该员工已经绑定其他用户账号");
+                throw new BusinessException("该员工已经绑定其他用户账号");
             }
 
             user.setEmployeeId(updateDTO.getEmployeeId());
@@ -402,7 +403,7 @@ public class SysUserServiceImpl implements SysUserService {
                 sysUserMapper.selectById(id);
 
         if (user == null) {
-            throw new RuntimeException("用户不存在");
+            throw new BusinessException("用户不存在");
         }
 
         sysUserMapper.deleteById(id);

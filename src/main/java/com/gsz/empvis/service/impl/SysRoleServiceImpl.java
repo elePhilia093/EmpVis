@@ -8,6 +8,7 @@ import com.gsz.empvis.dto.role.RoleQueryDTO;
 import com.gsz.empvis.dto.role.RoleUpdateDTO;
 import com.gsz.empvis.entity.SysRole;
 import com.gsz.empvis.entity.SysUserRole;
+import com.gsz.empvis.exception.BusinessException;
 import com.gsz.empvis.mapper.SysRoleMapper;
 import com.gsz.empvis.mapper.SysUserRoleMapper;
 import com.gsz.empvis.service.SysRoleService;
@@ -95,7 +96,7 @@ public class SysRoleServiceImpl implements SysRoleService {
                 sysRoleMapper.selectCount(wrapper);
 
         if (count > 0) {
-            throw new RuntimeException("角色编码已存在");
+            throw new BusinessException("角色编码已存在");
         }
 
         SysRole role = new SysRole();
@@ -116,7 +117,7 @@ public class SysRoleServiceImpl implements SysRoleService {
                 sysRoleMapper.selectById(updateDTO.getId());
 
         if (role == null) {
-            throw new RuntimeException("角色不存在");
+            throw new BusinessException("角色不存在");
         }
 
         if (StringUtils.hasText(updateDTO.getRoleCode())) {
@@ -138,7 +139,7 @@ public class SysRoleServiceImpl implements SysRoleService {
                     sysRoleMapper.selectCount(wrapper);
 
             if (count > 0) {
-                throw new RuntimeException("角色编码已存在");
+                throw new BusinessException("角色编码已存在");
             }
 
             role.setRoleCode(updateDTO.getRoleCode());
@@ -161,7 +162,7 @@ public class SysRoleServiceImpl implements SysRoleService {
                 sysRoleMapper.selectById(id);
 
         if (role == null) {
-            throw new RuntimeException("角色不存在");
+            throw new BusinessException("角色不存在");
         }
 
         // 判断角色是否已经分配给用户
@@ -177,7 +178,7 @@ public class SysRoleServiceImpl implements SysRoleService {
                 sysUserRoleMapper.selectCount(wrapper);
 
         if (count > 0) {
-            throw new RuntimeException(
+            throw new BusinessException(
                     "该角色已分配给用户，不能直接删除"
             );
         }

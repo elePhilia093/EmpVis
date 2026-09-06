@@ -1,18 +1,25 @@
-package com.gsz.empvis.vo.user;
+package com.gsz.empvis.vo.dept;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
-public class UserVO {
+public class SysDeptVO {
 
     private Long id;
 
-    private String username;
+    private Long parentId;
 
-    private Long employeeId;
+    private String deptCode;
+
+    private String deptName;
+
+    private Long leaderId;
+
+    private Integer sortOrder;
 
     private Integer status;
 
@@ -21,6 +28,5 @@ public class UserVO {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateTime;
+    private List<SysDeptVO> children;
 }

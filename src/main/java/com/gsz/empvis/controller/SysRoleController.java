@@ -31,7 +31,7 @@ public class SysRoleController {
         );
     }
 
-    @PostMapping
+    @PostMapping("/add")
     @PreAuthorize("hasAuthority('system:role:add')")
     public Result<Void> add(
             @Valid @RequestBody RoleAddDTO addDTO) {
@@ -41,7 +41,7 @@ public class SysRoleController {
         return Result.success(null);
     }
 
-    @PutMapping
+    @PutMapping("/update")
     @PreAuthorize("hasAuthority('system:role:update')")
     public Result<Void> update(
             @Valid @RequestBody RoleUpdateDTO updateDTO) {
@@ -51,7 +51,7 @@ public class SysRoleController {
         return Result.success(null);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAuthority('system:role:delete')")
     public Result<Void> delete(
             @PathVariable Long id) {

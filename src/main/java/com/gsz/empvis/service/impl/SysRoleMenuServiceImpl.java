@@ -5,6 +5,7 @@ import com.gsz.empvis.dto.role.RoleMenuDTO;
 import com.gsz.empvis.entity.SysMenu;
 import com.gsz.empvis.entity.SysRole;
 import com.gsz.empvis.entity.SysRoleMenu;
+import com.gsz.empvis.exception.BusinessException;
 import com.gsz.empvis.mapper.SysMenuMapper;
 import com.gsz.empvis.mapper.SysRoleMapper;
 import com.gsz.empvis.mapper.SysRoleMenuMapper;
@@ -54,7 +55,7 @@ public class SysRoleMenuServiceImpl implements SysRoleMenuService {
                 sysRoleMapper.selectById(dto.getRoleId());
 
         if (role == null) {
-            throw new RuntimeException("角色不存在");
+            throw new BusinessException("角色不存在");
         }
 
         // 删除原有菜单权限
@@ -86,7 +87,7 @@ public class SysRoleMenuServiceImpl implements SysRoleMenuService {
                     sysMenuMapper.selectById(menuId);
 
             if (menu == null) {
-                throw new RuntimeException(
+                throw new BusinessException(
                         "菜单不存在：" + menuId
                 );
             }
