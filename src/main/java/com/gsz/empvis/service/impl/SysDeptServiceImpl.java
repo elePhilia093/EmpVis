@@ -23,6 +23,7 @@ public class SysDeptServiceImpl implements SysDeptService {
     private final SysDeptMapper sysDeptMapper;
 
     public SysDeptServiceImpl(SysDeptMapper sysDeptMapper) {
+
         this.sysDeptMapper = sysDeptMapper;
     }
 

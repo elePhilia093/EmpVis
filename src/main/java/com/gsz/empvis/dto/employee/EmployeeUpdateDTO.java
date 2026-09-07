@@ -1,37 +1,36 @@
-package com.gsz.empvis.entity;
+package com.gsz.empvis.dto.employee;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-@TableName("emp_employee")
-public class EmpEmployee {
+public class EmployeeUpdateDTO {
 
     /**
      * 员工ID
      */
-    @TableId(type = IdType.AUTO)
+    @NotNull(message = "员工ID不能为空")
     private Long id;
 
     /**
      * 员工编号
      */
+    @NotBlank(message = "员工编号不能为空")
     private String employeeNo;
 
     /**
      * 员工姓名
      */
+    @NotBlank(message = "员工姓名不能为空")
     private String employeeName;
 
     /**
      * 性别
-     * 1-男
-     * 2-女
      */
+    @NotNull(message = "请选择性别")
     private Integer gender;
 
     /**
@@ -52,10 +51,12 @@ public class EmpEmployee {
     /**
      * 所属部门ID
      */
+    @NotNull(message = "请选择所属部门")
     private Long deptId;
 
     /**
      * 职位名称
      */
+    @NotBlank(message = "职位名称不能为空")
     private String positionName;
 }

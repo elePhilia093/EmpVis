@@ -1,20 +1,15 @@
-package com.gsz.empvis.entity;
+package com.gsz.empvis.vo.employee;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
-@TableName("emp_employee")
-public class EmpEmployee {
+public class EmployeeVO {
 
     /**
      * 员工ID
      */
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
@@ -29,8 +24,6 @@ public class EmpEmployee {
 
     /**
      * 性别
-     * 1-男
-     * 2-女
      */
     private Integer gender;
 
@@ -53,6 +46,11 @@ public class EmpEmployee {
      * 所属部门ID
      */
     private Long deptId;
+
+    /**
+     * 所属部门名称
+     */
+    private String deptName;
 
     /**
      * 职位名称
