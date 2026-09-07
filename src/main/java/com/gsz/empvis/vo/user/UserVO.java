@@ -18,6 +18,8 @@ public class UserVO {
 
     private String remark;
 
+    private String employeeName;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 

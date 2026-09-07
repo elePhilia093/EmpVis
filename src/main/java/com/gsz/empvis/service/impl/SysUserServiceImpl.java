@@ -6,17 +6,9 @@ import com.gsz.empvis.common.PageResult;
 import com.gsz.empvis.dto.user.UserAddDTO;
 import com.gsz.empvis.dto.user.UserQueryDTO;
 import com.gsz.empvis.dto.user.UserUpdateDTO;
-import com.gsz.empvis.entity.SysMenu;
-import com.gsz.empvis.entity.SysRole;
-import com.gsz.empvis.entity.SysRoleMenu;
-import com.gsz.empvis.entity.SysUser;
-import com.gsz.empvis.entity.SysUserRole;
+import com.gsz.empvis.entity.*;
 import com.gsz.empvis.exception.BusinessException;
-import com.gsz.empvis.mapper.SysMenuMapper;
-import com.gsz.empvis.mapper.SysRoleMapper;
-import com.gsz.empvis.mapper.SysRoleMenuMapper;
-import com.gsz.empvis.mapper.SysUserMapper;
-import com.gsz.empvis.mapper.SysUserRoleMapper;
+import com.gsz.empvis.mapper.*;
 import com.gsz.empvis.service.SysUserService;
 import com.gsz.empvis.utils.JwtUtil;
 import com.gsz.empvis.vo.user.LoginVO;
@@ -28,9 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SysUserServiceImpl implements SysUserService {
@@ -49,6 +40,8 @@ public class SysUserServiceImpl implements SysUserService {
 
     private final SysMenuMapper sysMenuMapper;
 
+    private final EmpEmployeeMapper empEmployeeMapper;
+
     public SysUserServiceImpl(
             SysUserMapper sysUserMapper,
             PasswordEncoder passwordEncoder,
@@ -56,6 +49,7 @@ public class SysUserServiceImpl implements SysUserService {
             SysUserRoleMapper sysUserRoleMapper,
             SysRoleMapper sysRoleMapper,
             SysRoleMenuMapper sysRoleMenuMapper,
+            EmpEmployeeMapper empEmployeeMapper,
             SysMenuMapper sysMenuMapper) {
 
         this.sysUserMapper = sysUserMapper;
@@ -65,6 +59,7 @@ public class SysUserServiceImpl implements SysUserService {
         this.sysRoleMapper = sysRoleMapper;
         this.sysRoleMenuMapper = sysRoleMenuMapper;
         this.sysMenuMapper = sysMenuMapper;
+        this.empEmployeeMapper = empEmployeeMapper;
     }
 
     @Override
@@ -246,6 +241,31 @@ public class SysUserServiceImpl implements SysUserService {
                 .stream()
                 .map(this::toVO)
                 .toList();
+        // 补充员工姓名
+        List<Long> employeeIds = records.stream()
+                .map(UserVO::getEmployeeId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (!employeeIds.isEmpty()) {
+
+            List<EmpEmployee> employees =
+                    empEmployeeMapper.selectBatchIds(employeeIds);
+
+            Map<Long, String> employeeNameMap =
+                    employees.stream()
+                            .collect(Collectors.toMap(
+                                    EmpEmployee::getId,
+                                    EmpEmployee::getEmployeeName
+                            ));
+
+            records.forEach(vo ->
+                    vo.setEmployeeName(
+                            employeeNameMap.get(vo.getEmployeeId())
+                    )
+            );
+        }
 
         return new PageResult<>(
                 records,
