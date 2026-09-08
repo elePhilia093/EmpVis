@@ -71,9 +71,43 @@ public class SysUserServiceImpl implements SysUserService {
             throw new BusinessException("用户不存在");
         }
 
+        // 查询用户角色关系
+        LambdaQueryWrapper<SysUserRole> userRoleWrapper =
+                new LambdaQueryWrapper<>();
+
+        userRoleWrapper.eq(
+                SysUserRole::getUserId,
+                userId
+        );
+
+        List<SysUserRole> userRoles =
+                sysUserRoleMapper.selectList(userRoleWrapper);
+
+        List<String> roleCodes = new ArrayList<>();
+
+        if (!userRoles.isEmpty()) {
+
+            List<Long> roleIds = userRoles.stream()
+                    .map(SysUserRole::getRoleId)
+                    .distinct()
+                    .toList();
+
+            List<SysRole> roles =
+                    sysRoleMapper.selectBatchIds(roleIds);
+
+            roleCodes = roles.stream()
+                    .filter(role ->
+                            role.getStatus() != null
+                                    && role.getStatus() == 1
+                    )
+                    .map(SysRole::getRoleCode)
+                    .toList();
+        }
+
         return new UserInfoVO(
                 user.getId(),
-                user.getUsername()
+                user.getUsername(),
+                roleCodes
         );
     }
 

@@ -6,15 +6,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gsz.empvis.dto.leave.LeaveAddDTO;
 import com.gsz.empvis.dto.leave.LeaveAuditDTO;
 import com.gsz.empvis.dto.leave.LeaveQueryDTO;
-import com.gsz.empvis.entity.EmpEmployee;
-import com.gsz.empvis.entity.EmpLeave;
-import com.gsz.empvis.entity.SysUser;
-import com.gsz.empvis.entity.SysUserRole;
+import com.gsz.empvis.entity.*;
 import com.gsz.empvis.exception.BusinessException;
-import com.gsz.empvis.mapper.EmpEmployeeMapper;
-import com.gsz.empvis.mapper.EmpLeaveMapper;
-import com.gsz.empvis.mapper.SysUserMapper;
-import com.gsz.empvis.mapper.SysUserRoleMapper;
+import com.gsz.empvis.mapper.*;
 import com.gsz.empvis.service.EmpLeaveService;
 import com.gsz.empvis.vo.leave.LeaveVO;
 import org.springframework.stereotype.Service;
@@ -30,16 +24,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class EmpLeaveServiceImpl implements EmpLeaveService {
+    private static final String ADMIN_ROLE_CODE = "ADMIN";
+    private static final String MANAGER_ROLE_CODE = "MANAGER";
+    private final SysRoleMapper sysRoleMapper;
 
-    /**
-     * 系统管理员角色ID
-     */
-    private static final Long ADMIN_ROLE_ID = 1L;
-
-    /**
-     * 主管角色ID
-     */
-    private static final Long MANAGER_ROLE_ID = 3L;
 
     private final EmpLeaveMapper empLeaveMapper;
     private final EmpEmployeeMapper empEmployeeMapper;
@@ -50,12 +38,14 @@ public class EmpLeaveServiceImpl implements EmpLeaveService {
             EmpLeaveMapper empLeaveMapper,
             EmpEmployeeMapper empEmployeeMapper,
             SysUserMapper sysUserMapper,
+            SysRoleMapper sysRoleMapper,
             SysUserRoleMapper sysUserRoleMapper) {
 
         this.empLeaveMapper = empLeaveMapper;
         this.empEmployeeMapper = empEmployeeMapper;
         this.sysUserMapper = sysUserMapper;
         this.sysUserRoleMapper = sysUserRoleMapper;
+        this.sysRoleMapper = sysRoleMapper;
     }
 
     /**
@@ -375,15 +365,7 @@ public class EmpLeaveServiceImpl implements EmpLeaveService {
          * 系统管理员：
          * 可以审批全部员工
          */
-        if (admin) {
-
-            // 管理员无需判断部门
-
-            /*
-             * 主管：
-             * 只能审批本部门员工
-             */
-        } else {
+        if (!admin) {
 
             EmpEmployee approverEmployee =
                     getEmployeeByUserId(
@@ -491,21 +473,29 @@ public class EmpLeaveServiceImpl implements EmpLeaveService {
      */
     private boolean isAdmin(Long userId) {
 
-        LambdaQueryWrapper<SysUserRole> wrapper =
-                new LambdaQueryWrapper<>();
-
-        wrapper.eq(
-                SysUserRole::getUserId,
-                userId
+        SysRole role = sysRoleMapper.selectOne(
+                new LambdaQueryWrapper<SysRole>()
+                        .eq(
+                                SysRole::getRoleCode,
+                                ADMIN_ROLE_CODE
+                        )
         );
 
-        wrapper.eq(
-                SysUserRole::getRoleId,
-                ADMIN_ROLE_ID
-        );
+        if (role == null) {
+            return false;
+        }
 
-        return sysUserRoleMapper
-                .selectCount(wrapper) > 0;
+        return sysUserRoleMapper.selectCount(
+                new LambdaQueryWrapper<SysUserRole>()
+                        .eq(
+                                SysUserRole::getUserId,
+                                userId
+                        )
+                        .eq(
+                                SysUserRole::getRoleId,
+                                role.getId()
+                        )
+        ) > 0;
     }
 
     /**
@@ -513,21 +503,29 @@ public class EmpLeaveServiceImpl implements EmpLeaveService {
      */
     private boolean isManager(Long userId) {
 
-        LambdaQueryWrapper<SysUserRole> wrapper =
-                new LambdaQueryWrapper<>();
-
-        wrapper.eq(
-                SysUserRole::getUserId,
-                userId
+        SysRole role = sysRoleMapper.selectOne(
+                new LambdaQueryWrapper<SysRole>()
+                        .eq(
+                                SysRole::getRoleCode,
+                                MANAGER_ROLE_CODE
+                        )
         );
 
-        wrapper.eq(
-                SysUserRole::getRoleId,
-                MANAGER_ROLE_ID
-        );
+        if (role == null) {
+            return false;
+        }
 
-        return sysUserRoleMapper
-                .selectCount(wrapper) > 0;
+        return sysUserRoleMapper.selectCount(
+                new LambdaQueryWrapper<SysUserRole>()
+                        .eq(
+                                SysUserRole::getUserId,
+                                userId
+                        )
+                        .eq(
+                                SysUserRole::getRoleId,
+                                role.getId()
+                        )
+        ) > 0;
     }
 
     /**

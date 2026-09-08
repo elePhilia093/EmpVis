@@ -4,15 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.gsz.empvis.dto.attendance.AttendanceQueryDTO;
-import com.gsz.empvis.entity.EmpAttendance;
-import com.gsz.empvis.entity.EmpEmployee;
-import com.gsz.empvis.entity.SysUser;
-import com.gsz.empvis.entity.SysUserRole;
+import com.gsz.empvis.entity.*;
 import com.gsz.empvis.exception.BusinessException;
-import com.gsz.empvis.mapper.EmpAttendanceMapper;
-import com.gsz.empvis.mapper.EmpEmployeeMapper;
-import com.gsz.empvis.mapper.SysUserMapper;
-import com.gsz.empvis.mapper.SysUserRoleMapper;
+import com.gsz.empvis.mapper.*;
 import com.gsz.empvis.service.EmpAttendanceService;
 import com.gsz.empvis.vo.attendance.AttendanceVO;
 import org.springframework.stereotype.Service;
@@ -28,16 +22,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class EmpAttendanceServiceImpl implements EmpAttendanceService {
-
-    /**
-     * 系统管理员角色ID
-     */
-    private static final Long ADMIN_ROLE_ID = 1L;
-
-    /**
-     * 主管角色ID
-     */
-    private static final Long MANAGER_ROLE_ID = 3L;
+    private static final String ADMIN_ROLE_CODE = "ADMIN";
+    private static final String MANAGER_ROLE_CODE = "MANAGER";
+    private final SysRoleMapper sysRoleMapper;
 
     /**
      * 上班时间
@@ -60,12 +47,14 @@ public class EmpAttendanceServiceImpl implements EmpAttendanceService {
             EmpAttendanceMapper empAttendanceMapper,
             EmpEmployeeMapper empEmployeeMapper,
             SysUserMapper sysUserMapper,
+            SysRoleMapper sysRoleMapper,
             SysUserRoleMapper sysUserRoleMapper) {
 
         this.empAttendanceMapper = empAttendanceMapper;
         this.empEmployeeMapper = empEmployeeMapper;
         this.sysUserMapper = sysUserMapper;
         this.sysUserRoleMapper = sysUserRoleMapper;
+        this.sysRoleMapper = sysRoleMapper;
     }
 
     /**
@@ -482,21 +471,28 @@ public class EmpAttendanceServiceImpl implements EmpAttendanceService {
      */
     private boolean isAdmin(Long userId) {
 
-        LambdaQueryWrapper<SysUserRole> wrapper =
-                new LambdaQueryWrapper<>();
-
-        wrapper.eq(
-                SysUserRole::getUserId,
-                userId
+        SysRole role = sysRoleMapper.selectOne(
+                new LambdaQueryWrapper<SysRole>()
+                        .eq(
+                                SysRole::getRoleCode,
+                                ADMIN_ROLE_CODE
+                        )
         );
 
-        wrapper.eq(
-                SysUserRole::getRoleId,
-                ADMIN_ROLE_ID
-        );
+        if (role == null) {
+            return false;
+        }
 
         return sysUserRoleMapper.selectCount(
-                wrapper
+                new LambdaQueryWrapper<SysUserRole>()
+                        .eq(
+                                SysUserRole::getUserId,
+                                userId
+                        )
+                        .eq(
+                                SysUserRole::getRoleId,
+                                role.getId()
+                        )
         ) > 0;
     }
 
@@ -505,21 +501,28 @@ public class EmpAttendanceServiceImpl implements EmpAttendanceService {
      */
     private boolean isManager(Long userId) {
 
-        LambdaQueryWrapper<SysUserRole> wrapper =
-                new LambdaQueryWrapper<>();
-
-        wrapper.eq(
-                SysUserRole::getUserId,
-                userId
+        SysRole role = sysRoleMapper.selectOne(
+                new LambdaQueryWrapper<SysRole>()
+                        .eq(
+                                SysRole::getRoleCode,
+                                MANAGER_ROLE_CODE
+                        )
         );
 
-        wrapper.eq(
-                SysUserRole::getRoleId,
-                MANAGER_ROLE_ID
-        );
+        if (role == null) {
+            return false;
+        }
 
         return sysUserRoleMapper.selectCount(
-                wrapper
+                new LambdaQueryWrapper<SysUserRole>()
+                        .eq(
+                                SysUserRole::getUserId,
+                                userId
+                        )
+                        .eq(
+                                SysUserRole::getRoleId,
+                                role.getId()
+                        )
         ) > 0;
     }
 
