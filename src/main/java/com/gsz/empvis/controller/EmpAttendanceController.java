@@ -3,22 +3,25 @@ package com.gsz.empvis.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.gsz.empvis.common.Result;
 import com.gsz.empvis.dto.attendance.AttendanceQueryDTO;
+import com.gsz.empvis.excel.service.ExcelService;
 import com.gsz.empvis.security.LoginUser;
 import com.gsz.empvis.service.EmpAttendanceService;
 import com.gsz.empvis.vo.attendance.AttendanceVO;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.Data;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
+@Data
 @RequestMapping("/emp/attendance")
 public class EmpAttendanceController {
 
     private final EmpAttendanceService empAttendanceService;
-
-    public EmpAttendanceController(
-            EmpAttendanceService empAttendanceService) {
-        this.empAttendanceService = empAttendanceService;
-    }
+    private final ExcelService excelService;
 
     /**
      * 分页查询考勤记录
@@ -76,5 +79,21 @@ public class EmpAttendanceController {
         empAttendanceService.checkOut(userId);
 
         return Result.success(null);
+    }
+
+    /**
+     * Excel 导出
+     */
+    @GetMapping("/export")
+    @PreAuthorize("hasAuthority('system:attendance:export')")
+    public void export(
+            AttendanceQueryDTO queryDTO,
+            HttpServletResponse response)
+            throws IOException {
+
+        excelService.exportAttendance(
+                queryDTO,
+                response
+        );
     }
 }

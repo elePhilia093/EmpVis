@@ -2,20 +2,23 @@ package com.gsz.empvis.excel.service.impl;
 
 import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.gsz.empvis.dto.attendance.AttendanceExportDTO;
+import com.gsz.empvis.dto.attendance.AttendanceQueryDTO;
 import com.gsz.empvis.dto.employee.EmployeeExcelDTO;
 import com.gsz.empvis.dto.employee.EmployeeExportDTO;
 import com.gsz.empvis.dto.employee.EmployeeQueryDTO;
-import com.gsz.empvis.entity.EmpEmployee;
-import com.gsz.empvis.entity.SysDept;
+import com.gsz.empvis.dto.leave.LeaveExportDTO;
+import com.gsz.empvis.dto.leave.LeaveQueryDTO;
+import com.gsz.empvis.entity.*;
 import com.gsz.empvis.excel.listener.EmployeeExcelListener;
 import com.gsz.empvis.excel.model.EmployeeImportRow;
 import com.gsz.empvis.excel.service.ExcelService;
 import com.gsz.empvis.excel.vo.ExcelErrorVO;
 import com.gsz.empvis.excel.vo.ExcelImportResultVO;
-import com.gsz.empvis.mapper.EmployeeMapper;
-import com.gsz.empvis.mapper.SysDeptMapper;
+import com.gsz.empvis.mapper.*;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Data;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,14 +27,11 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Data
 public class ExcelServiceImpl implements ExcelService {
 
     @Resource
@@ -40,8 +40,357 @@ public class ExcelServiceImpl implements ExcelService {
     @Resource
     private SysDeptMapper sysDeptMapper;
 
+    @Resource
+    private SysUserMapper sysUserMapper;
+
+    @Resource
+    private EmpAttendanceMapper empAttendanceMapper;
+
+    @Resource
+    private EmpLeaveMapper empLeaveMapper;
 
 
+    @Override
+    public void exportAttendance(
+            AttendanceQueryDTO queryDTO,
+            HttpServletResponse response) throws IOException {
+
+        LambdaQueryWrapper<EmpAttendance> wrapper =
+                new LambdaQueryWrapper<>();
+
+        if (queryDTO != null) {
+
+            if (queryDTO.getEmployeeId() != null) {
+                wrapper.eq(
+                        EmpAttendance::getEmployeeId,
+                        queryDTO.getEmployeeId()
+                );
+            }
+
+            if (queryDTO.getAttendanceDate() != null) {
+                wrapper.eq(
+                        EmpAttendance::getAttendanceDate,
+                        queryDTO.getAttendanceDate()
+                );
+            }
+
+            if (queryDTO.getAttendanceStatus() != null) {
+                wrapper.eq(
+                        EmpAttendance::getAttendanceStatus,
+                        queryDTO.getAttendanceStatus()
+                );
+            }
+        }
+
+        wrapper.orderByDesc(
+                EmpAttendance::getAttendanceDate
+        );
+
+        List<EmpAttendance> list =
+                empAttendanceMapper.selectList(wrapper);
+
+        Set<Long> employeeIds =
+                list.stream()
+                        .map(EmpAttendance::getEmployeeId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+
+        Map<Long, EmpEmployee> employeeMap =
+                employeeIds.isEmpty()
+                        ? new HashMap<>()
+                        : employeeMapper.selectBatchIds(employeeIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                EmpEmployee::getId,
+                                employee -> employee
+                        ));
+
+        List<AttendanceExportDTO> exportList =
+                new ArrayList<>();
+
+        for (EmpAttendance attendance : list) {
+
+            AttendanceExportDTO dto =
+                    new AttendanceExportDTO();
+
+            EmpEmployee employee =
+                    employeeMap.get(
+                            attendance.getEmployeeId()
+                    );
+
+            if (employee != null) {
+                dto.setEmployeeNo(
+                        employee.getEmployeeNo()
+                );
+
+                dto.setEmployeeName(
+                        employee.getEmployeeName()
+                );
+            }
+
+            dto.setAttendanceDate(
+                    attendance.getAttendanceDate() == null
+                            ? ""
+                            : attendance.getAttendanceDate().toString()
+            );
+
+            dto.setCheckInTime(
+                    attendance.getCheckInTime() == null
+                            ? ""
+                            : attendance.getCheckInTime().toString()
+            );
+
+            dto.setCheckOutTime(
+                    attendance.getCheckOutTime() == null
+                            ? ""
+                            : attendance.getCheckOutTime().toString()
+            );
+
+            dto.setAttendanceStatus(
+                    convertAttendanceStatus(
+                            attendance.getAttendanceStatus()
+                    )
+            );
+
+            dto.setLateMinutes(
+                    attendance.getLateMinutes()
+            );
+
+            dto.setEarlyLeaveMinutes(
+                    attendance.getEarlyLeaveMinutes()
+            );
+
+            dto.setRemark(
+                    attendance.getRemark()
+            );
+
+            exportList.add(dto);
+        }
+
+        writeExcel(
+                response,
+                "考勤记录.xlsx",
+                "考勤记录",
+                AttendanceExportDTO.class,
+                exportList
+        );
+    }
+
+    private String convertAttendanceStatus(
+            Integer status) {
+
+        if (status == null) {
+            return "";
+        }
+
+        return switch (status) {
+            case 1 -> "正常";
+            case 2 -> "迟到";
+            case 3 -> "早退";
+            case 4 -> "迟到早退";
+            default -> "未知";
+        };
+    }
+
+    @Override
+    public void exportLeave(
+            LeaveQueryDTO queryDTO,
+            HttpServletResponse response) throws IOException {
+
+        LambdaQueryWrapper<EmpLeave> wrapper =
+                new LambdaQueryWrapper<>();
+
+        if (queryDTO != null) {
+
+            if (queryDTO.getEmployeeId() != null) {
+                wrapper.eq(
+                        EmpLeave::getEmployeeId,
+                        queryDTO.getEmployeeId()
+                );
+            }
+
+            if (queryDTO.getApprovalStatus() != null) {
+                wrapper.eq(
+                        EmpLeave::getApprovalStatus,
+                        queryDTO.getApprovalStatus()
+                );
+            }
+
+            if (queryDTO.getStartDate() != null) {
+                wrapper.ge(
+                        EmpLeave::getStartTime,
+                        queryDTO.getStartDate()
+                                .atStartOfDay()
+                );
+            }
+
+            if (queryDTO.getEndDate() != null) {
+                wrapper.lt(
+                        EmpLeave::getStartTime,
+                        queryDTO.getEndDate()
+                                .plusDays(1)
+                                .atStartOfDay()
+                );
+            }
+        }
+
+        wrapper.orderByDesc(
+                EmpLeave::getStartTime
+        );
+
+        List<EmpLeave> list =
+                empLeaveMapper.selectList(wrapper);
+
+        Set<Long> employeeIds =
+                list.stream()
+                        .map(EmpLeave::getEmployeeId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+
+        Set<Long> approverIds =
+                list.stream()
+                        .map(EmpLeave::getApproverId)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toSet());
+
+        Map<Long, EmpEmployee> employeeMap =
+                employeeIds.isEmpty()
+                        ? new HashMap<>()
+                        : employeeMapper.selectBatchIds(employeeIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                EmpEmployee::getId,
+                                employee -> employee
+                        ));
+
+        Map<Long, SysUser> userMap =
+                approverIds.isEmpty()
+                        ? new HashMap<>()
+                        : sysUserMapper.selectBatchIds(approverIds)
+                        .stream()
+                        .collect(Collectors.toMap(
+                                SysUser::getId,
+                                user -> user
+                        ));
+
+        List<LeaveExportDTO> exportList =
+                new ArrayList<>();
+
+        for (EmpLeave leave : list) {
+
+            LeaveExportDTO dto =
+                    new LeaveExportDTO();
+
+            EmpEmployee employee =
+                    employeeMap.get(
+                            leave.getEmployeeId()
+                    );
+
+            if (employee != null) {
+                dto.setEmployeeNo(
+                        employee.getEmployeeNo()
+                );
+
+                dto.setEmployeeName(
+                        employee.getEmployeeName()
+                );
+            }
+
+            dto.setLeaveType(
+                    convertLeaveType(
+                            leave.getLeaveType()
+                    )
+            );
+
+            dto.setStartTime(
+                    leave.getStartTime() == null
+                            ? ""
+                            : leave.getStartTime().toString()
+            );
+
+            dto.setEndTime(
+                    leave.getEndTime() == null
+                            ? ""
+                            : leave.getEndTime().toString()
+            );
+
+            dto.setLeaveDays(
+                    leave.getLeaveDays()
+            );
+
+            dto.setReason(
+                    leave.getReason()
+            );
+
+            dto.setApprovalStatus(
+                    convertApprovalStatus(
+                            leave.getApprovalStatus()
+                    )
+            );
+
+            SysUser approver =
+                    userMap.get(
+                            leave.getApproverId()
+                    );
+
+            dto.setApproverName(
+                    approver == null
+                            ? ""
+                            : approver.getUsername()
+            );
+
+            dto.setApprovalTime(
+                    leave.getApprovalTime() == null
+                            ? ""
+                            : leave.getApprovalTime().toString()
+            );
+
+            dto.setApprovalComment(
+                    leave.getApprovalComment()
+            );
+
+            exportList.add(dto);
+        }
+
+        writeExcel(
+                response,
+                "请假记录.xlsx",
+                "请假记录",
+                LeaveExportDTO.class,
+                exportList
+        );
+    }
+    private String convertLeaveType(
+            Integer type) {
+
+        if (type == null) {
+            return "";
+        }
+
+        return switch (type) {
+            case 1 -> "事假";
+            case 2 -> "病假";
+            case 3 -> "年假";
+            case 4 -> "婚假";
+            case 5 -> "产假";
+            default -> "其他";
+        };
+    }
+
+    private String convertApprovalStatus(
+            Integer status) {
+
+        if (status == null) {
+            return "";
+        }
+
+        return switch (status) {
+            case 0 -> "待审批";
+            case 1 -> "已通过";
+            case 2 -> "已驳回";
+            default -> "未知";
+        };
+    }
     @Override
     public void exportEmployee(
             EmployeeQueryDTO queryDTO,
@@ -514,5 +863,42 @@ public class ExcelServiceImpl implements ExcelService {
 
         return value == null
                 || value.trim().isEmpty();
+    }
+
+    private <T> void writeExcel(
+            HttpServletResponse response,
+            String fileName,
+            String sheetName,
+            Class<T> clazz,
+            List<T> data
+    ) throws IOException {
+
+        String encodedFileName =
+                URLEncoder.encode(
+                        fileName,
+                        StandardCharsets.UTF_8
+                ).replace("+", "%20");
+
+        response.setContentType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        );
+
+        response.setCharacterEncoding(
+                StandardCharsets.UTF_8.name()
+        );
+
+        response.setHeader(
+                "Content-Disposition",
+                "attachment; filename*=UTF-8''"
+                        + encodedFileName
+        );
+
+        EasyExcel.write(
+                        response.getOutputStream(),
+                        clazz
+                )
+                .autoCloseStream(false)
+                .sheet(sheetName)
+                .doWrite(data);
     }
 }

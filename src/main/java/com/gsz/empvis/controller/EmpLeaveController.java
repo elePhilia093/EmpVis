@@ -5,24 +5,27 @@ import com.gsz.empvis.common.Result;
 import com.gsz.empvis.dto.leave.LeaveAddDTO;
 import com.gsz.empvis.dto.leave.LeaveAuditDTO;
 import com.gsz.empvis.dto.leave.LeaveQueryDTO;
+import com.gsz.empvis.excel.service.ExcelService;
 import com.gsz.empvis.security.LoginUser;
 import com.gsz.empvis.service.EmpLeaveService;
 import com.gsz.empvis.vo.leave.LeaveVO;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.Data;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
+@Data
 @RequestMapping("/emp/leave")
 public class EmpLeaveController {
 
     private final EmpLeaveService empLeaveService;
 
-    public EmpLeaveController(
-            EmpLeaveService empLeaveService) {
-        this.empLeaveService = empLeaveService;
-    }
+    private final ExcelService excelService;
 
     /**
      * 分页查询请假记录
@@ -91,5 +94,21 @@ public class EmpLeaveController {
                 (LoginUser) authentication.getPrincipal();
 
         return loginUser.getUser().getId();
+    }
+
+    /**
+     * Excel 导出
+     */
+    @GetMapping("/export")
+    @PreAuthorize("hasAuthority('system:leave:export')")
+    public void export(
+            LeaveQueryDTO queryDTO,
+            HttpServletResponse response)
+            throws IOException {
+
+        excelService.exportLeave(
+                queryDTO,
+                response
+        );
     }
 }
