@@ -10,34 +10,32 @@ import com.gsz.empvis.entity.EmpEmployee;
 import com.gsz.empvis.entity.SysDept;
 import com.gsz.empvis.entity.SysUser;
 import com.gsz.empvis.exception.BusinessException;
-import com.gsz.empvis.mapper.EmpEmployeeMapper;
+import com.gsz.empvis.mapper.EmployeeMapper;
 import com.gsz.empvis.mapper.SysDeptMapper;
 import com.gsz.empvis.mapper.SysUserMapper;
-import com.gsz.empvis.service.EmpEmployeeService;
+import com.gsz.empvis.service.EmployeeService;
 import com.gsz.empvis.vo.employee.EmployeeVO;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class EmpEmployeeServiceImpl implements EmpEmployeeService {
+public class EmployeeServiceImpl implements EmployeeService {
 
-    private final EmpEmployeeMapper empEmployeeMapper;
+    private final EmployeeMapper employeeMapper;
     private final SysDeptMapper sysDeptMapper;
     private final SysUserMapper sysUserMapper;
 
-    public EmpEmployeeServiceImpl(
-            EmpEmployeeMapper empEmployeeMapper,
+    public EmployeeServiceImpl(
+            EmployeeMapper employeeMapper,
             SysDeptMapper sysDeptMapper,
             SysUserMapper sysUserMapper
             ) {
 
-        this.empEmployeeMapper = empEmployeeMapper;
+        this.employeeMapper = employeeMapper;
         this.sysDeptMapper = sysDeptMapper;
         this.sysUserMapper = sysUserMapper;
     }
@@ -84,7 +82,7 @@ public class EmpEmployeeServiceImpl implements EmpEmployeeService {
         wrapper.orderByAsc(EmpEmployee::getId);
 
         IPage<EmpEmployee> employeePage =
-                empEmployeeMapper.selectPage(page, wrapper);
+                employeeMapper.selectPage(page, wrapper);
 
         List<EmpEmployee> employees =
                 employeePage.getRecords();
@@ -125,7 +123,7 @@ public class EmpEmployeeServiceImpl implements EmpEmployeeService {
         );
 
         Long count =
-                empEmployeeMapper.selectCount(noWrapper);
+                employeeMapper.selectCount(noWrapper);
 
         if (count > 0) {
             throw new BusinessException("员工编号已存在");
@@ -145,7 +143,7 @@ public class EmpEmployeeServiceImpl implements EmpEmployeeService {
         employee.setDeptId(addDTO.getDeptId());
         employee.setPositionName(addDTO.getPositionName());
 
-        empEmployeeMapper.insert(employee);
+        employeeMapper.insert(employee);
     }
 
     /**
@@ -155,7 +153,7 @@ public class EmpEmployeeServiceImpl implements EmpEmployeeService {
     public void update(EmployeeUpdateDTO updateDTO) {
 
         EmpEmployee employee =
-                empEmployeeMapper.selectById(updateDTO.getId());
+                employeeMapper.selectById(updateDTO.getId());
 
         if (employee == null) {
             throw new BusinessException("员工不存在");
@@ -176,7 +174,7 @@ public class EmpEmployeeServiceImpl implements EmpEmployeeService {
         );
 
         Long count =
-                empEmployeeMapper.selectCount(noWrapper);
+                employeeMapper.selectCount(noWrapper);
 
         if (count > 0) {
             throw new BusinessException("员工编号已存在");
@@ -194,7 +192,7 @@ public class EmpEmployeeServiceImpl implements EmpEmployeeService {
         employee.setDeptId(updateDTO.getDeptId());
         employee.setPositionName(updateDTO.getPositionName());
 
-        empEmployeeMapper.updateById(employee);
+        employeeMapper.updateById(employee);
     }
 
     /**
@@ -204,7 +202,7 @@ public class EmpEmployeeServiceImpl implements EmpEmployeeService {
     public void delete(Long id) {
 
         EmpEmployee employee =
-                empEmployeeMapper.selectById(id);
+                employeeMapper.selectById(id);
 
         if (employee == null) {
             throw new BusinessException("员工不存在");
@@ -227,7 +225,7 @@ public class EmpEmployeeServiceImpl implements EmpEmployeeService {
             );
         }
 
-        empEmployeeMapper.deleteById(id);
+        employeeMapper.deleteById(id);
     }
 
     /**

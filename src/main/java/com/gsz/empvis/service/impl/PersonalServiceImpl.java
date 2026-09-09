@@ -6,7 +6,7 @@ import com.gsz.empvis.entity.EmpEmployee;
 import com.gsz.empvis.entity.SysDept;
 import com.gsz.empvis.entity.SysUser;
 import com.gsz.empvis.exception.BusinessException;
-import com.gsz.empvis.mapper.EmpEmployeeMapper;
+import com.gsz.empvis.mapper.EmployeeMapper;
 import com.gsz.empvis.mapper.SysDeptMapper;
 import com.gsz.empvis.mapper.SysUserMapper;
 import com.gsz.empvis.service.PersonalService;
@@ -22,7 +22,7 @@ public class PersonalServiceImpl
 
     private final SysUserMapper sysUserMapper;
 
-    private final EmpEmployeeMapper empEmployeeMapper;
+    private final EmployeeMapper employeeMapper;
 
     private final SysDeptMapper sysDeptMapper;
 
@@ -30,12 +30,12 @@ public class PersonalServiceImpl
 
     public PersonalServiceImpl(
             SysUserMapper sysUserMapper,
-            EmpEmployeeMapper empEmployeeMapper,
+            EmployeeMapper employeeMapper,
             SysDeptMapper sysDeptMapper,
             PasswordEncoder passwordEncoder) {
 
         this.sysUserMapper = sysUserMapper;
-        this.empEmployeeMapper = empEmployeeMapper;
+        this.employeeMapper = employeeMapper;
         this.sysDeptMapper = sysDeptMapper;
         this.passwordEncoder = passwordEncoder;
     }
@@ -77,7 +77,7 @@ public class PersonalServiceImpl
         }
 
         EmpEmployee employee =
-                empEmployeeMapper.selectById(
+                employeeMapper.selectById(
                         user.getEmployeeId()
                 );
 
@@ -163,7 +163,7 @@ public class PersonalServiceImpl
         }
 
         EmpEmployee employee =
-                empEmployeeMapper.selectById(
+                employeeMapper.selectById(
                         user.getEmployeeId()
                 );
 
@@ -192,7 +192,7 @@ public class PersonalServiceImpl
                         : null
         );
 
-        empEmployeeMapper.updateById(
+        employeeMapper.updateById(
                 employee
         );
     }

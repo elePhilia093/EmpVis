@@ -6,7 +6,7 @@ import com.gsz.empvis.dto.employee.EmployeeQueryDTO;
 import com.gsz.empvis.dto.employee.EmployeeUpdateDTO;
 import com.gsz.empvis.vo.employee.EmployeeVO;
 
-public interface EmpEmployeeService {
+public interface EmployeeService {
 
     /**
      * 分页查询员工

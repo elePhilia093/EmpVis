@@ -12,7 +12,7 @@ import com.gsz.empvis.entity.SysRole;
 import com.gsz.empvis.entity.SysUser;
 import com.gsz.empvis.entity.SysUserRole;
 import com.gsz.empvis.exception.BusinessException;
-import com.gsz.empvis.mapper.EmpEmployeeMapper;
+import com.gsz.empvis.mapper.EmployeeMapper;
 import com.gsz.empvis.mapper.EmpSalaryMapper;
 import com.gsz.empvis.mapper.SysRoleMapper;
 import com.gsz.empvis.mapper.SysUserMapper;
@@ -51,20 +51,20 @@ public class EmpSalaryServiceImpl implements EmpSalaryService {
             DateTimeFormatter.ofPattern("yyyy-MM");
 
     private final EmpSalaryMapper empSalaryMapper;
-    private final EmpEmployeeMapper empEmployeeMapper;
+    private final EmployeeMapper employeeMapper;
     private final SysUserMapper sysUserMapper;
     private final SysUserRoleMapper sysUserRoleMapper;
     private final SysRoleMapper sysRoleMapper;
 
     public EmpSalaryServiceImpl(
             EmpSalaryMapper empSalaryMapper,
-            EmpEmployeeMapper empEmployeeMapper,
+            EmployeeMapper employeeMapper,
             SysUserMapper sysUserMapper,
             SysUserRoleMapper sysUserRoleMapper,
             SysRoleMapper sysRoleMapper) {
 
         this.empSalaryMapper = empSalaryMapper;
-        this.empEmployeeMapper = empEmployeeMapper;
+        this.employeeMapper = employeeMapper;
         this.sysUserMapper = sysUserMapper;
         this.sysUserRoleMapper = sysUserRoleMapper;
         this.sysRoleMapper = sysRoleMapper;
@@ -120,7 +120,7 @@ public class EmpSalaryServiceImpl implements EmpSalaryService {
         } else if (manager) {
 
             List<EmpEmployee> employees =
-                    empEmployeeMapper.selectList(
+                    employeeMapper.selectList(
                             new LambdaQueryWrapper<EmpEmployee>()
                                     .eq(
                                             EmpEmployee::getDeptId,
@@ -251,7 +251,7 @@ public class EmpSalaryServiceImpl implements EmpSalaryService {
          * 检查员工
          */
         EmpEmployee employee =
-                empEmployeeMapper.selectById(
+                employeeMapper.selectById(
                         addDTO.getEmployeeId()
                 );
 
@@ -399,7 +399,7 @@ public class EmpSalaryServiceImpl implements EmpSalaryService {
          * 检查员工
          */
         EmpEmployee employee =
-                empEmployeeMapper.selectById(
+                employeeMapper.selectById(
                         updateDTO.getEmployeeId()
                 );
 
@@ -669,7 +669,7 @@ public class EmpSalaryServiceImpl implements EmpSalaryService {
         }
 
         EmpEmployee employee =
-                empEmployeeMapper.selectById(
+                employeeMapper.selectById(
                         user.getEmployeeId()
                 );
 
@@ -843,7 +843,7 @@ public class EmpSalaryServiceImpl implements EmpSalaryService {
         }
 
         List<EmpEmployee> employees =
-                empEmployeeMapper.selectBatchIds(
+                employeeMapper.selectBatchIds(
                         employeeIds
                 );
 

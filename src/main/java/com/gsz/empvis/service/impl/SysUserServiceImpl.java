@@ -40,7 +40,7 @@ public class SysUserServiceImpl implements SysUserService {
 
     private final SysMenuMapper sysMenuMapper;
 
-    private final EmpEmployeeMapper empEmployeeMapper;
+    private final EmployeeMapper employeeMapper;
 
     public SysUserServiceImpl(
             SysUserMapper sysUserMapper,
@@ -49,7 +49,7 @@ public class SysUserServiceImpl implements SysUserService {
             SysUserRoleMapper sysUserRoleMapper,
             SysRoleMapper sysRoleMapper,
             SysRoleMenuMapper sysRoleMenuMapper,
-            EmpEmployeeMapper empEmployeeMapper,
+            EmployeeMapper employeeMapper,
             SysMenuMapper sysMenuMapper) {
 
         this.sysUserMapper = sysUserMapper;
@@ -59,7 +59,7 @@ public class SysUserServiceImpl implements SysUserService {
         this.sysRoleMapper = sysRoleMapper;
         this.sysRoleMenuMapper = sysRoleMenuMapper;
         this.sysMenuMapper = sysMenuMapper;
-        this.empEmployeeMapper = empEmployeeMapper;
+        this.employeeMapper = employeeMapper;
     }
 
     @Override
@@ -285,7 +285,7 @@ public class SysUserServiceImpl implements SysUserService {
         if (!employeeIds.isEmpty()) {
 
             List<EmpEmployee> employees =
-                    empEmployeeMapper.selectBatchIds(employeeIds);
+                    employeeMapper.selectBatchIds(employeeIds);
 
             Map<Long, String> employeeNameMap =
                     employees.stream()

@@ -30,19 +30,19 @@ public class EmpLeaveServiceImpl implements EmpLeaveService {
 
 
     private final EmpLeaveMapper empLeaveMapper;
-    private final EmpEmployeeMapper empEmployeeMapper;
+    private final EmployeeMapper employeeMapper;
     private final SysUserMapper sysUserMapper;
     private final SysUserRoleMapper sysUserRoleMapper;
 
     public EmpLeaveServiceImpl(
             EmpLeaveMapper empLeaveMapper,
-            EmpEmployeeMapper empEmployeeMapper,
+            EmployeeMapper employeeMapper,
             SysUserMapper sysUserMapper,
             SysRoleMapper sysRoleMapper,
             SysUserRoleMapper sysUserRoleMapper) {
 
         this.empLeaveMapper = empLeaveMapper;
-        this.empEmployeeMapper = empEmployeeMapper;
+        this.employeeMapper = employeeMapper;
         this.sysUserMapper = sysUserMapper;
         this.sysUserRoleMapper = sysUserRoleMapper;
         this.sysRoleMapper = sysRoleMapper;
@@ -96,7 +96,7 @@ public class EmpLeaveServiceImpl implements EmpLeaveService {
         } else if (manager) {
 
             List<EmpEmployee> employees =
-                    empEmployeeMapper.selectList(
+                    employeeMapper.selectList(
                             new LambdaQueryWrapper<EmpEmployee>()
                                     .eq(
                                             EmpEmployee::getDeptId,
@@ -373,7 +373,7 @@ public class EmpLeaveServiceImpl implements EmpLeaveService {
                     );
 
             EmpEmployee applicant =
-                    empEmployeeMapper.selectById(
+                    employeeMapper.selectById(
                             leave.getEmployeeId()
                     );
 
@@ -454,7 +454,7 @@ public class EmpLeaveServiceImpl implements EmpLeaveService {
         }
 
         EmpEmployee employee =
-                empEmployeeMapper.selectById(
+                employeeMapper.selectById(
                         user.getEmployeeId()
                 );
 
@@ -614,7 +614,7 @@ public class EmpLeaveServiceImpl implements EmpLeaveService {
         }
 
         List<EmpEmployee> employees =
-                empEmployeeMapper.selectBatchIds(
+                employeeMapper.selectBatchIds(
                         employeeIds
                 );
 

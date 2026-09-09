@@ -39,19 +39,19 @@ public class EmpAttendanceServiceImpl implements EmpAttendanceService {
             LocalTime.of(18, 0);
 
     private final EmpAttendanceMapper empAttendanceMapper;
-    private final EmpEmployeeMapper empEmployeeMapper;
+    private final EmployeeMapper employeeMapper;
     private final SysUserMapper sysUserMapper;
     private final SysUserRoleMapper sysUserRoleMapper;
 
     public EmpAttendanceServiceImpl(
             EmpAttendanceMapper empAttendanceMapper,
-            EmpEmployeeMapper empEmployeeMapper,
+            EmployeeMapper employeeMapper,
             SysUserMapper sysUserMapper,
             SysRoleMapper sysRoleMapper,
             SysUserRoleMapper sysUserRoleMapper) {
 
         this.empAttendanceMapper = empAttendanceMapper;
-        this.empEmployeeMapper = empEmployeeMapper;
+        this.employeeMapper = employeeMapper;
         this.sysUserMapper = sysUserMapper;
         this.sysUserRoleMapper = sysUserRoleMapper;
         this.sysRoleMapper = sysRoleMapper;
@@ -109,7 +109,7 @@ public class EmpAttendanceServiceImpl implements EmpAttendanceService {
         } else if (manager) {
 
             List<EmpEmployee> employees =
-                    empEmployeeMapper.selectList(
+                    employeeMapper.selectList(
                             new LambdaQueryWrapper<EmpEmployee>()
                                     .eq(
                                             EmpEmployee::getDeptId,
@@ -427,7 +427,7 @@ public class EmpAttendanceServiceImpl implements EmpAttendanceService {
         }
 
         EmpEmployee employee =
-                empEmployeeMapper.selectById(
+                employeeMapper.selectById(
                         user.getEmployeeId()
                 );
 
@@ -671,7 +671,7 @@ public class EmpAttendanceServiceImpl implements EmpAttendanceService {
         }
 
         List<EmpEmployee> employees =
-                empEmployeeMapper.selectBatchIds(
+                employeeMapper.selectBatchIds(
                         employeeIds
                 );
 
